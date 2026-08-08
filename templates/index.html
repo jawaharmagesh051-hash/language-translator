@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeLingo AI - Natural Language Translator</title>
+    <meta name="description" content="Instant multi-language AI translator with Google Translate NMT neural engine, speech recognition, text-to-speech, and glassmorphism design.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background Ambient Glowing Orbs -->
+    <div class="ambient-glow orb-1"></div>
+    <div class="ambient-glow orb-2"></div>
+    <div class="ambient-glow orb-3"></div>
+
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>GlobeLingo <span class="badge">Google NMT</span></h1>
+                    <p class="tagline">Human-Like Natural Language AI Engine</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Google NMT Active</span>
+                </div>
+                <button id="themeToggle" class="icon-btn theme-btn" title="Toggle Theme" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Quick Language Preset Pills -->
+        <section class="quick-presets" aria-label="Popular Languages">
+            <span class="preset-label"><i class="fa-solid fa-bolt"></i> Quick Selection:</span>
+            <div class="preset-pills">
+                <button class="preset-pill active" data-src="auto" data-tgt="en">Auto &rarr; English</button>
+                <button class="preset-pill" data-src="en" data-tgt="es">English &rarr; Spanish</button>
+                <button class="preset-pill" data-src="en" data-tgt="fr">English &rarr; French</button>
+                <button class="preset-pill" data-src="en" data-tgt="de">English &rarr; German</button>
+                <button class="preset-pill" data-src="en" data-tgt="hi">English &rarr; Hindi</button>
+                <button class="preset-pill" data-src="en" data-tgt="ta">English &rarr; Tamil</button>
+                <button class="preset-pill" data-src="en" data-tgt="ja">English &rarr; Japanese</button>
+            </div>
+        </section>
+
+        <!-- Main Translator Workspace Card -->
+        <main class="translator-card">
+            <!-- Source Text Panel -->
+            <div class="panel source-panel">
+                <div class="panel-header">
+                    <div class="select-wrapper">
+                        <i class="fa-solid fa-language select-icon"></i>
+                        <select id="sourceLangSelect" aria-label="Source Language">
+                            {% for code, name in languages.items() %}
+                                <option value="{{ code }}" {% if code == 'auto' %}selected{% endif %}>
+                                    {{ name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                    </div>
+
+                    <div class="panel-header-actions">
+                        <button id="clearTextBtn" class="action-icon-btn" title="Clear text" aria-label="Clear text">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="textarea-wrapper">
+                    <textarea id="sourceText" placeholder="Type, paste, or speak text to translate naturally..." maxlength="5000" rows="6"></textarea>
+                </div>
+
+                <div class="panel-footer">
+                    <div class="tool-buttons">
+                        <button id="voiceInputBtn" class="tool-btn" title="Speak to Input" aria-label="Speech to Text">
+                            <i class="fa-solid fa-microphone"></i>
+                            <span>Listen</span>
+                        </button>
+                        <button id="pasteTextBtn" class="tool-btn" title="Paste Clipboard" aria-label="Paste Clipboard">
+                            <i class="fa-solid fa-paste"></i>
+                            <span>Paste</span>
+                        </button>
+                        <button id="speakSourceBtn" class="tool-btn" title="Listen to Input Text" aria-label="Text to Speech">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
+                    <div class="char-count">
+                        <span id="currentCharCount">0</span> / 5000
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swap & Action Divider -->
+            <div class="translator-divider">
+                <button id="swapLangBtn" class="swap-btn" title="Swap Languages (Alt+S)" aria-label="Swap Languages">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- Target Translation Panel -->
+            <div class="panel target-panel">
+                <div class="panel-header">
+                    <div class="select-wrapper">
+                        <i class="fa-solid fa-globe select-icon"></i>
+                        <select id="targetLangSelect" aria-label="Target Language">
+                            {% for code, name in languages.items() %}
+                                {% if code != 'auto' %}
+                                    <option value="{{ code }}" {% if code == 'es' %}selected{% endif %}>
+                                        {{ name }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                    </div>
+
+                    <div class="detected-badges-group">
+                        <div class="detected-badge" id="detectedBadge" style="display: none;">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span id="detectedLangName">Detected</span>
+                        </div>
+                        <div class="detected-badge model-badge" id="modelBadge">
+                            <i class="fa-solid fa-brain"></i>
+                            <span id="modelName">Google NMT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="textarea-wrapper">
+                    <div id="targetText" class="output-display" tabindex="0" role="region" aria-label="Translation Result">
+                        <span class="placeholder-text">Human-like natural translation will appear here...</span>
+                    </div>
+                    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                        <div class="pulse-spinner"></div>
+                        <span>Translating with Google NMT...</span>
+                    </div>
+                </div>
+
+                <div class="panel-footer">
+                    <div class="tool-buttons">
+                        <button id="copyTargetBtn" class="tool-btn" title="Copy Translation" aria-label="Copy Translation">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                        <button id="speakTargetBtn" class="tool-btn" title="Listen to Translation" aria-label="Text to Speech">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>Audio</span>
+                        </button>
+                        <button id="downloadBtn" class="tool-btn" title="Download Translation (.txt)" aria-label="Download Translation">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </div>
+                    <div class="latency-info" id="latencyInfo"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- CTA Action Bar -->
+        <div class="translate-cta-bar">
+            <button id="translateBtn" class="btn-primary">
+                <i class="fa-solid fa-language"></i>
+                <span>Translate Now</span>
+                <span class="key-shortcut">Ctrl + Enter</span>
+            </button>
+        </div>
+
+        <!-- Translation History Section -->
+        <section class="history-section">
+            <div class="history-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Translation History</h3>
+                <button id="clearHistoryBtn" class="text-btn">Clear History</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <p class="empty-history">No recent translations. Start translating above!</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 GlobeLingo AI &bull; Google Translate Neural Machine Translation Engine</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
